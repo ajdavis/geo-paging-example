@@ -2,7 +2,10 @@
 <html>
 <head>
     <title>{% block title %}{% endblock %}</title>
-    <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='bootstrap-combined.min.css') }}" rel="stylesheet">
+    <script type="text/javascript" src="{{ url_for('static', filename='jquery-2.0.3.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='jquery.loadTemplate-0.5.4.min.js') }}"></script>
+    {% block extrahead %}{% endblock %}
 </head>
 <body>
     {% block body %}
