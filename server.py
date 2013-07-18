@@ -44,19 +44,20 @@ def address_to_lat_lon(addr):
 @app.route(
     '/near/<float:lat>/<float:lon>/page/<int:page>/min/<float:min_distance>/last_id/<last_id>')
 def near(lat, lon, page=1, min_distance=0, last_id=None):
-    # NOTE: lon, lat order!!
+    results_per_page = 10
 
     if last_id:
         query = {'_id': {'$ne': ObjectId(last_id)}}
     else:
         query = {}
 
+    # NOTE: lon, lat order!!
     results = db.command(
         'geoNear', 'cafes',
         near={'type': 'Point', 'coordinates': [lon, lat]},
         query=query,
         spherical=True,
-        num=10,
+        num=results_per_page,
         minDistance=min_distance
     )['results']
 
@@ -76,6 +77,7 @@ def near(lat, lon, page=1, min_distance=0, last_id=None):
 
     return render_template(
         'near.html', results=results, lat=lat, lon=lon, page=page,
+        results_per_page=results_per_page,
         start_url=start_url, next_url=next_url)
 
 
