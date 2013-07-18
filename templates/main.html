@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}
+Geo-Paging Example
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Geo-Paging Example</h1>
+    <p>Enter your full address.</p>
+    <p>I'll get your coordinates from Google Maps and look for NYC sidewalk caf&eacute;s near you.</p>
+    <form action="{{ url_for('address') }}" method="post" class="form-horizontal">
+        <div class="control-group">
+            <label class="control-label" for="address">Address:</label>
+            <div class="controls">
+                <input id="address" name="address" type="text" placeholder="123 E 14th St, NY NY">
+            </div>
+        </div>
+        <div class="control-group">
+            <div class="controls">
+                <button type="submit">Go!</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
