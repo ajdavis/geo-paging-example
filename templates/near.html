@@ -4,51 +4,67 @@
 Sidewalk Caf&eacute;s Near {{ lat }}, {{ lon }}
 {% endblock %}
 
+{% block extrahead %}
+    <style type="text/css">
+        td.seq {
+            width: 18px;
+            text-align: right;
+        }
+
+        td.distance {
+            width: 96px;
+            text-align: right;
+        }
+
+        td.cafe-name {
+            width: 400px;
+            text-align: left;
+            text-transform: capitalize;
+        }
+
+        td.street {
+            width: 200px;
+            text-align: left;
+            text-transform: capitalize;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
 <div class="container">
     <h1>Nearby Sidewalk Caf&eacute;s</h1>
-    <h2>Page {{ page }}</h2>
-    <table class="table table-striped table-bordered table-condensed table-hover">
-        <thead>
-            <tr>
-                <th></th>
-                <th>Distance</th>
-                <th>Name</th>
-                <th>Location</th>
-                <th>Sidewalk Caf&eacute; Type</th>
-            </tr>
-        </thead>
-        {% for result in results %}
-            {% set obj = result['obj'] %}
-            <tr>
-                <td>
-                    {{ loop.index + ((page - 1) * results_per_page) }}
-                </td>
-                <td>
-                    {{ result['dis']|round|int }} meters
-                </td>
-                <td>
-                    {{ obj['Camis Trade Name'] or obj['Entity Name'] }}
-                </td>
-                <td>
-                    {{ obj['Address Street Name'] }}
-                </td>
-                <td>
-                    {{ obj['Sidewalk Cafe Type'] }}
-                </td>
-            </tr>
-        {% endfor %}
+    <h4>Page <span id="page-number">1</span></h4>
+    <table class="table table-striped table-bordered table-condensed table-hover"
+           id="results"
+           style="width: auto">
     </table>
-        <div class="btn-toolbar center">
-            <div class="btn-group">
-                {% if page == 1 %}
-                    {% set maybe_disabled = 'disabled' %}
-                {% else %}
-                    {% set maybe_disabled = '' %}
-                {% endif %}
-                <a class="btn {{ maybe_disabled }}" href="{{ start_url }}"><i class="icon-arrow-left"></i>&nbsp;&nbsp;Start Over</a>
-                <a class="btn" href="{{ next_url }}">Next&nbsp;&nbsp;<i class="icon-arrow-right"></i></a>
-            </div>
+    <div class="btn-toolbar center">
+        <div class="btn-group">
+            <a id="previous" class="btn" href="#"><i class="icon-arrow-left"></i>&nbsp;&nbsp;Previous</a>
+            <a id="next" class="btn" href="#">Next&nbsp;&nbsp;<i class="icon-arrow-right"></i></a>
         </div>
+    </div>
+    <script type="text/javascript" src="{{ url_for('static', filename='near.js') }}"></script>
+    <script type="text/javascript">
+        // Communicate from Jinja2 template to Javascript in near.js.
+        window.pageData = {
+            lat: {{ lat }},
+            lon: {{ lon }}
+        };
+    </script>
+
+    <!-- Templates -->
+    <script type="text/html" id="result-template">
+        <tr>
+            <td class="seq" data-content="seq">
+            </td>
+            <td class="distance">
+                <span data-content="distance" data-format="toInt"></span> meters
+            </td>
+            <td class="cafe-name" data-content="name">
+            </td>
+            <td class="street" data-content="street">
+        </tr>
+    </script>
 </div>
 {% endblock %}

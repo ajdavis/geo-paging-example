@@ -1,6 +1,8 @@
 import urllib
-from bson import ObjectId
-from flask import Flask, redirect, url_for
+from math import isnan
+
+from bson import ObjectId, json_util
+from flask import Flask, redirect, url_for, Response
 from flask import render_template
 from flask import request
 from pymongo import MongoClient
@@ -41,44 +43,40 @@ def address_to_lat_lon(addr):
 
 
 @app.route('/near/<float:lat>/<float:lon>')
-@app.route(
-    '/near/<float:lat>/<float:lon>/page/<int:page>/min/<float:min_distance>/last_id/<last_id>')
-def near(lat, lon, page=1, min_distance=0, last_id=None):
-    results_per_page = 10
+def near(lat, lon):
+    return render_template('near.html', results=results, lat=lat, lon=lon)
 
-    if last_id:
-        query = {'_id': {'$ne': ObjectId(last_id)}}
+
+@app.route('/results/json', methods=['POST'])
+def results():
+    request_data = request.get_json()
+    num = int(request_data['num'])
+    skip_ids = [ObjectId(_id) for _id in request_data['skipIds']]
+    min_distance = float(request_data['minDistance'])
+    lat = float(request_data['lat'])
+    lon = float(request_data['lon'])
+
+    if skip_ids:
+        query = {'_id': {'$nin': skip_ids}}
     else:
         query = {}
 
     # NOTE: lon, lat order!!
-    results = db.command(
+    result = db.command(
         'geoNear', 'cafes',
         near={'type': 'Point', 'coordinates': [lon, lat]},
         query=query,
         spherical=True,
-        num=results_per_page,
+        num=num,
         minDistance=min_distance
-    )['results']
+    )
 
-    if results:
-        last_result = results[-1]
-        next_min_distance = last_result['dis']
-        last_id = last_result['obj']['_id']
-    else:
-        next_min_distance = min_distance
-        last_id = None
+    # Special case: if no results, avgDistance is NaN.
+    if isnan(result['stats']['avgDistance']):
+        result['stats']['avgDistance'] = 0
 
-    start_url = url_for('near', lat=lat, lon=lon)
-
-    next_url = url_for(
-        'near', lat=lat, lon=lon, page=(page + 1),
-        min_distance=next_min_distance, last_id=last_id)
-
-    return render_template(
-        'near.html', results=results, lat=lat, lon=lon, page=page,
-        results_per_page=results_per_page,
-        start_url=start_url, next_url=next_url)
+    return Response(
+        json_util.dumps(result, allow_nan=False), mimetype='application/json')
 
 
 @app.route('/address', methods=['POST'])
