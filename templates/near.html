@@ -8,24 +8,32 @@ Sidewalk Caf&eacute;s Near {{ lat }}, {{ lon }}
     <style type="text/css">
         /* Fix interference b/w Bootstrap and Google Maps */
         #map-canvas img { max-width: none; }
+
+        td, td div {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+        }
+
         td.seq {
             width: 18px;
             text-align: right;
         }
 
         td.distance {
-            width: 96px;
+            width: 150px;
             text-align: right;
         }
 
-        td.cafe-name {
-            width: 400px;
+        td div.cafe-name {
+            width: 200px;
             text-align: left;
             text-transform: capitalize;
         }
 
-        td.street {
-            width: 200px;
+        td div.street {
+            width: 150px;
             text-align: left;
             text-transform: capitalize;
         }
