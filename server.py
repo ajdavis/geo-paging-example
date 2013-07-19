@@ -87,7 +87,8 @@ def address():
 
 @app.route('/')
 def main():
-    return render_template('main.html')
+    n_cafes = db.cafes.count()
+    return render_template('main.html', n_cafes=n_cafes)
 
 
 if __name__ == '__main__':

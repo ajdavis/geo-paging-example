@@ -6,21 +6,17 @@ Geo-Paging Example
 
 {% block body %}
 <div class="container">
-    <h1>Geo-Paging Example</h1>
-    <p>Enter your full address.</p>
-    <p>I'll get your coordinates from Google Maps and look for NYC sidewalk caf&eacute;s near you.</p>
+    <h1>MongoDB Geospatial Paging Demo</h1>
+    <p class="lead">An example app for <code>geoNear</code> and <code>minDistance</code>.</p>
     <form action="{{ url_for('address') }}" method="post" class="form-horizontal">
-        <div class="control-group">
-            <label class="control-label" for="address">Address:</label>
-            <div class="controls">
-                <input id="address" name="address" type="text" placeholder="123 E 14th St, NY NY">
-            </div>
-        </div>
-        <div class="control-group">
-            <div class="controls">
-                <button type="submit">Go!</button>
-            </div>
-        </div>
+        <p>Enter a location. A Manhattan zipcode like "10009" works well.<br><br></p>
+        <label class="control-label" for="address">Address:&nbsp;</label>
+        <input id="address" name="address" type="text" value="10009" class="input-xlarge">
+        <button class="btn btn-primary" type="submit">Go!</button>
     </form>
+    <br>
+    <p>I know of {{ n_cafes }} sidewalk caf&eacute;s in New York City
+       thanks to the <a href="https://data.cityofnewyork.us/Business/Sidewalk-Cafes/6k68-kc8u">NYC Open Data project</a>.</p>
+    <p>Code on <a href="https://github.com/ajdavis/geo-paging-example">GitHub</a>.</p>
 </div>
 {% endblock %}
