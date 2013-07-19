@@ -39,6 +39,13 @@ Sidewalk Caf&eacute;s Near {{ lat }}, {{ lon }}
 {% block body %}
 <div class="container">
     <h1>Nearby Sidewalk Caf&eacute;s</h1>
+    <div class="row">
+        <div class="span6">
+            <p></p>
+            <a class="btn" href="{{ url_for('main') }}"><i class="icon-search"></i>&nbsp;&nbsp;Search again</a>
+        </div>
+    </div>
+
     <h4>Page <span id="page-number">1</span></h4>
     <div class="row">
         <div class="span6">
