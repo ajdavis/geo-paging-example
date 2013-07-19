@@ -9,7 +9,7 @@ from pymongo import MongoClient
 from werkzeug.routing import NumberConverter
 
 db = MongoClient().test
-app = Flask(__name__)
+app = Flask(__name__, static_path='/geopaging/static')
 
 
 # Accept more 'float' numbers than Werkzeug does by default: also accept
@@ -42,12 +42,12 @@ def address_to_lat_lon(addr):
         return float(lat), float(lng)
 
 
-@app.route('/near/<float:lat>/<float:lon>')
+@app.route('/geopaging/near/<float:lat>/<float:lon>')
 def near(lat, lon):
     return render_template('near.html', results=results, lat=lat, lon=lon)
 
 
-@app.route('/results/json', methods=['POST'])
+@app.route('/geopaging/results/json', methods=['POST'])
 def results():
     request_data = request.get_json()
     num = int(request_data['num'])
@@ -79,13 +79,13 @@ def results():
         json_util.dumps(result, allow_nan=False), mimetype='application/json')
 
 
-@app.route('/address', methods=['POST'])
+@app.route('/geopaging/address', methods=['POST'])
 def address():
     lat, lon = address_to_lat_lon(request.form.get('address'))
     return redirect(url_for('near', lat=lat, lon=lon))
 
 
-@app.route('/')
+@app.route('/geopaging')
 def main():
     n_cafes = db.cafes.count()
     return render_template('main.html', n_cafes=n_cafes)
