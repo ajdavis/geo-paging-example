@@ -2,11 +2,12 @@ $(function() {
     // CONFIGURATION.
     var rowsPerPage = 10;
 
-    // See http://codepb.github.io/jquery-template/index.html
-    $.addTemplateFormatter("toInt",
-        function (value, template) {
-            return value.toFixed(0);
-        });
+    var resultTemplate = Handlebars.compile($('#result-template').html()),
+        infoWindowTemplate = Handlebars.compile($('#info-window-template').html());
+
+    Handlebars.registerHelper('distanceFormat', function(distance) {
+        return distance.toFixed(0).toString();
+    });
 
     // GLOBAL STATE.
     // Rows are kept sorted by distance.
@@ -14,6 +15,7 @@ $(function() {
     var rows = [],
         map,
         mapMarkers = [],
+        mapInfoWindows = [],
         pageNo = 1,
         // Farthest row we've seen so far.
         maxDistance = 0;
@@ -74,18 +76,27 @@ $(function() {
         }).error(errback);
     }
 
+    function getRowsShown() {
+        return rows.slice((pageNo - 1) * rowsPerPage, pageNo * rowsPerPage);
+    }
+
     function updateTable(pagingDirection) {
-        var $resultsTable = $('#results');
-        $resultsTable.find('tr').remove();
-        $resultsTable.loadTemplate(
-            '#result-template',
-            rows,
-            {
-                paged: true,
-                pageNo: pageNo,
-                elemPerPage: rowsPerPage
-            }
-        );
+        $('#results')
+            .html(resultTemplate({rows: getRowsShown()}))
+            .find('tr').click(function() {
+                var rowId = $(this).attr('data-rowid');
+
+                // Find the appropriate map info window and show it. There are at
+                // most 'rowsPerPage' info windows in the array.
+                for (var i = 0; i < mapInfoWindows.length; ++i) {
+                    var infoWindow = mapInfoWindows[i];
+                    if (infoWindow.rowId == rowId) {
+                        closeAllInfoWindows();
+                        infoWindow.open(map, infoWindow.marker);
+                        return;
+                    }
+                }
+            });
 
         $('#page-number').html(pageNo.toString());
     }
@@ -93,16 +104,11 @@ $(function() {
     function updateMap(pagingDirection) {
         clearMapPoints();
 
-        var points = $.map(
-            rows.slice((pageNo - 1) * rowsPerPage, pageNo * rowsPerPage),
-            function(row) {
-                // map() would flatten [lat, lon], so nest it in another array.
-                return [row.latlon];
-            }
-        );
-
-        addPointsToMap(points);
-        zoomMapToFit(points, pagingDirection);
+        var rowsShown = getRowsShown();
+        addPointsToMap(rowsShown);
+        var center = new google.maps.LatLng(window.pageData.lat, window.pageData.lon);
+        map.setCenter(center);
+        zoomMapToFit(rowsShown, pagingDirection);
     }
 
     // Redisplay the table and map. Get more rows from server if necessary.
@@ -157,16 +163,36 @@ $(function() {
 
     google.maps.event.addDomListener(window, 'load', initializeMap);
 
+    function makeInfoWindow(row, marker) {
+        var contentString = infoWindowTemplate(row);
+        var infoWindow = new google.maps.InfoWindow({content: contentString});
+        infoWindow.rowId = row.id;
+        infoWindow.marker = marker;
+        google.maps.event.addListener(marker, 'click', function() {
+            closeAllInfoWindows();
+            infoWindow.open(map, marker);
+        });
+        return infoWindow;
+    }
+
     function clearMapPoints() {
         mapMarkers.forEach(function(marker) {
             marker.setMap(null);
         });
 
         mapMarkers = [];
+        closeAllInfoWindows();
+        mapInfoWindows = [];
+    }
+
+    function closeAllInfoWindows() {
+        mapInfoWindows.forEach(function(infoWindow) {
+            infoWindow.close();
+        })
     }
 
     // Add a list of [lat, lon] pairs.
-    function addPointsToMap(points) {
+    function addPointsToMap(rowsShown) {
         var circle = {
             path: google.maps.SymbolPath.CIRCLE,
               fillColor: "blue",
@@ -176,8 +202,8 @@ $(function() {
               strokeWeight: 1
         };
 
-        points.forEach(function(point) {
-            var latlng = new google.maps.LatLng(point[0], point[1]),
+        rowsShown.forEach(function(row) {
+            var latlng = new google.maps.LatLng(row.latlon[0], row.latlon[1]),
                 marker = new google.maps.Marker({
                     map: map,
                     draggable: false,
@@ -186,23 +212,24 @@ $(function() {
                 });
 
             mapMarkers.push(marker);
+            mapInfoWindows.push(makeInfoWindow(row, marker));
         });
     }
 
     // points is a list of [lat, lon]. pagingDirection is 'next' or 'previous'.
-    function zoomMapToFit(points, pagingDirection) {
+    function zoomMapToFit(rowsShown, pagingDirection) {
         // Not ready?
-        if ( ! points.length || ! map.getBounds()) {
+        if ( ! rowsShown.length || ! map.getBounds()) {
             // Try later.
             google.maps.event.addListenerOnce(map, 'idle', function(){
-                zoomMapToFit(points, pagingDirection);
+                zoomMapToFit(rowsShown, pagingDirection);
             });
 
             return;
         }
 
-        var latLngs = $.map(points, function(point) {
-            return new google.maps.LatLng(point[0], point[1]);
+        var latLngs = $.map(rowsShown, function(row) {
+            return new google.maps.LatLng(row.latlon[0], row.latlon[1]);
         });
 
         function fits() {

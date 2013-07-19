@@ -43,6 +43,15 @@ Sidewalk Caf&eacute;s Near {{ lat }}, {{ lon }}
             padding: 0;
             height: 300px;
         }
+
+        #map-canvas .info-window .cafe-name {
+            font-weight: bold;
+        }
+
+        #map-canvas .info-window .cafe-name,
+        #map-canvas .info-window .street {
+            text-transform: capitalize;
+        }
     </style>
 {% endblock %}
 
@@ -84,18 +93,24 @@ Sidewalk Caf&eacute;s Near {{ lat }}, {{ lon }}
         };
     </script>
 
-    <!-- Templates -->
-    <script type="text/html" id="result-template">
-        <tr>
-            <td class="seq" data-content="seq">
-            </td>
-            <td class="distance">
-                <span data-content="distance" data-format="toInt"></span> m
-            </td>
-            <td class="cafe-name" data-content="name">
-            </td>
-            <td class="street" data-content="street">
-        </tr>
+    <!-- Handlebars Templates. -->
+    {% raw %}
+    <script type="text/html" id="result-template">{{#rows}}<tr data-rowid="{{ id }}">
+            <td class="seq">{{ seq }}</td>
+            <td class="distance">{{ distanceFormat distance }} m</td>
+            <td><div class="cafe-name">{{ name }}</div></td>
+            <td><div class="street">{{ street }}</div></td>
+        </tr>{{/rows}}</script>
+
+    <script type="text/html" id="info-window-template">
+        <div class="info-window">
+            <p class="cafe-name">{{ name }}</p>
+            <p>
+                <span class="street">{{ street }}</span><br>
+                {{ distanceFormat distance }} meters
+            </p>
+        </div>
     </script>
+    {% endraw %}
 </div>
 {% endblock %}
