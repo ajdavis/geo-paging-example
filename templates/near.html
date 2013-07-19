@@ -6,6 +6,8 @@ Sidewalk Caf&eacute;s Near {{ lat }}, {{ lon }}
 
 {% block extrahead %}
     <style type="text/css">
+        /* Fix interference b/w Bootstrap and Google Maps */
+        #map-canvas img { max-width: none; }
         td.seq {
             width: 18px;
             text-align: right;
