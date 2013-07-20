@@ -6,7 +6,7 @@ Pages through search results for sidewalk cafés near your address.
 
 (Café data from [NYC Open Data](https://data.cityofnewyork.us/Business/Sidewalk-Cafes/6k68-kc8u).)
 
-Read my (blog post)[http://emptysqua.re/blog/paging-geo-mongodb/] describing the technique.
+Read my [blog post](http://emptysqua.re/blog/paging-geo-mongodb/) describing the technique.
 
 Setup
 -----
