@@ -153,11 +153,24 @@ $(function() {
             mapOptions);
 
         // Center point.
-        new google.maps.Marker({
+        var marker = new google.maps.Marker({
             map: map,
-            draggable: false,
+            draggable: true,
             animation: google.maps.Animation.DROP,
             position: center
+        });
+
+        google.maps.event.addListener(marker, 'dragend', function() {
+            window.pageData.lat = marker.getPosition().jb;
+            window.pageData.lon = marker.getPosition().kb;
+
+            rows = [];
+            maxDistance = 0;
+            pageNo = 1;
+
+            showPage(1, 'next', function() {
+                $previous.addClass('disabled');
+            });
         });
     }
 
