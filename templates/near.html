@@ -58,9 +58,13 @@ Sidewalk Caf&eacute;s Near {{ lat }}, {{ lon }}
 {% block body %}
 <div class="container">
     <div class="row">
-        <div class="span6">
-            <p></p>
-            <a class="btn" href="{{ url_for('main') }}"><i class="icon-search"></i>&nbsp;&nbsp;Search again</a>
+        <p></p>
+        <div class="span8">
+            <form action="{{ url_for('address') }}" method="post" class="form-horizontal">
+                <label class="control-label" for="address">Address:&nbsp;</label>
+                <input id="address" name="address" type="text" value="10009" class="input-xlarge">
+                <button class="btn" type="submit"><i class="icon-search"></i>&nbsp;&nbsp;Search again</button>
+            </form>
         </div>
     </div>
 
