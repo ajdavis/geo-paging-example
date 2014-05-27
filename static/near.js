@@ -161,8 +161,8 @@ $(function() {
         });
 
         google.maps.event.addListener(marker, 'dragend', function() {
-            window.pageData.lat = marker.getPosition().jb;
-            window.pageData.lon = marker.getPosition().kb;
+            window.pageData.lat = marker.getPosition().lat();
+            window.pageData.lon = marker.getPosition().lng();
 
             rows = [];
             maxDistance = 0;
