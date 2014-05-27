@@ -22,3 +22,9 @@ Run
 ---
 
 Run `python server.py` from the project directory.
+
+About
+-----
+
+Author: A. Jesse Jiryu Davis
+Contributors: [Gianfranco Palumbo](https://github.com/gianpaj)
