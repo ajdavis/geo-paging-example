@@ -101,22 +101,22 @@ $(function() {
         $('#page-number').html(pageNo.toString());
     }
 
-    function updateMap(pagingDirection) {
+    function updateMap(pagingDirection, isReset) {
         clearMapPoints();
 
         var rowsShown = getRowsShown();
         addPointsToMap(rowsShown);
         var center = new google.maps.LatLng(window.pageData.lat, window.pageData.lon);
         map.setCenter(center);
-        zoomMapToFit(rowsShown, pagingDirection);
+        zoomMapToFit(rowsShown, pagingDirection, isReset);
     }
 
     // Redisplay the table and map. Get more rows from server if necessary.
     // pagingDirection is 'next' or 'previous'.
-    function showPage(pageNo, pagingDirection, callback) {
+    function showPage(pageNo, pagingDirection, isReset, callback) {
         function onRowsReady() {
             updateTable(pagingDirection);
-            updateMap(pagingDirection);
+            updateMap(pagingDirection, isReset);
             if (callback) callback();
         }
         
@@ -168,7 +168,7 @@ $(function() {
             maxDistance = 0;
             pageNo = 1;
 
-            showPage(1, 'next', function() {
+            showPage(1, 'next', true, function() {
                 $previous.addClass('disabled');
             });
         });
@@ -230,12 +230,12 @@ $(function() {
     }
 
     // points is a list of [lat, lon]. pagingDirection is 'next' or 'previous'.
-    function zoomMapToFit(rowsShown, pagingDirection) {
+    function zoomMapToFit(rowsShown, pagingDirection, isReset) {
         // Not ready?
         if ( ! rowsShown.length || ! map.getBounds()) {
             // Try later.
             google.maps.event.addListenerOnce(map, 'idle', function(){
-                zoomMapToFit(rowsShown, pagingDirection);
+                zoomMapToFit(rowsShown, pagingDirection, isReset);
             });
 
             return;
@@ -255,6 +255,11 @@ $(function() {
 
         var zoom = map.getZoom(),
             mapType = map.mapTypes[map.mapTypeId];
+
+        if (isReset) {
+            zoom = 16;
+            map.setZoom(zoom);
+        }
 
         if (pagingDirection == 'next') {
             // Zoom out.
@@ -277,7 +282,7 @@ $(function() {
         $next.addClass('disabled');
         $previous.addClass('disabled');
 
-        showPage(--pageNo, 'previous', function() {
+        showPage(--pageNo, 'previous', false, function() {
             $next.removeClass('disabled');
             if (pageNo > 1) $previous.removeClass('disabled');
         });
@@ -289,7 +294,7 @@ $(function() {
         $next.addClass('disabled');
         $previous.addClass('disabled');
 
-        showPage(++pageNo, 'next', function() {
+        showPage(++pageNo, 'next', false, function() {
             $previous.removeClass('disabled');
             $next.removeClass('disabled');
         });
@@ -300,7 +305,7 @@ $(function() {
     // Initial display.
     $previous.addClass('disabled');
     $next.addClass('disabled');
-    showPage(1, 'next', function() {
+    showPage(1, 'next', false, function() {
         $next.removeClass('disabled');
     });
 });
