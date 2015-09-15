@@ -96,7 +96,8 @@ def address():
         return redirect(url_for('near', lat=lat, lon=lon))
     except NoResults:
         flash('No results for "%s"' % query)
-        return redirect(url_for('near', lat=0, lon=0))
+        # Put user in the East Village.
+        return redirect(url_for('near', lat=40.7275043, lon=-73.9800645))
 
 
 @app.route('/geopaging')
