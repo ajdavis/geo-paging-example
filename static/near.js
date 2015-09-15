@@ -102,6 +102,11 @@ $(function() {
     }
 
     function updateMap(pagingDirection, isReset) {
+        if (!map) {
+            // Not loaded yet.
+            return;
+        }
+
         clearMapPoints();
 
         var rowsShown = getRowsShown();
@@ -172,6 +177,8 @@ $(function() {
                 $previous.addClass('disabled');
             });
         });
+
+        updateMap();
     }
 
     google.maps.event.addDomListener(window, 'load', initializeMap);
