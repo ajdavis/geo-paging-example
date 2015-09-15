@@ -1,4 +1,4 @@
-pymongo==2.5.2
+pymongo==3.0.3
 Flask==0.10.1
 requests==2.6.0
 googlemaps==2.3
