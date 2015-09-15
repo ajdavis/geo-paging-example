@@ -18,6 +18,8 @@ Install the Python packages in `requirements.txt`.
 
 Run `python load_cafes.py` from the project directory.
 
+Follow [the instructions to get a Google API key](https://github.com/googlemaps/google-maps-services-python), and place it in a file called google_api_key.txt.
+
 Run
 ---
 

@@ -56,6 +56,17 @@ Sidewalk Caf&eacute;s Near {{ lat }}, {{ lon }}
 {% endblock %}
 
 {% block body %}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="container">
+            <div class="row">
+                {% for message in messages %}
+                    <div class="span12 alert warning">{{ message }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+{% endwith %}
 <div class="container">
     <div class="row">
         <p></p>

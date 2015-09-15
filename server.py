@@ -1,15 +1,27 @@
-import urllib
 from math import isnan
 
 from bson import ObjectId, json_util
-from flask import Flask, redirect, url_for, Response
+from flask import Flask, redirect, url_for, Response, flash
 from flask import render_template
 from flask import request
+import googlemaps
 from pymongo import MongoClient
+import sys
 from werkzeug.routing import NumberConverter
 
 db = MongoClient().test
 app = Flask(__name__, static_path='/geopaging/static')
+
+try:
+    with open('google_api_key.txt') as f:
+        google_api_key = f.read().decode().strip()
+except IOError as error:
+    print("Couldn't open google_api_key.txt, see README for config "
+          "instructions: %s" % error)
+
+    sys.exit(1)
+
+gmaps = googlemaps.Client(key=google_api_key)
 
 
 # Accept more 'float' numbers than Werkzeug does by default: also accept
@@ -26,20 +38,17 @@ class NegativeFloatConverter(NumberConverter):
 app.url_map.converters['float'] = NegativeFloatConverter
 
 
+class NoResults(Exception):
+    pass
+
+
 def address_to_lat_lon(addr):
-    url = 'http://maps.google.com/?q=' + urllib.quote(addr) + '&output=js'
+    geocode_result = gmaps.geocode(addr)
+    if not geocode_result:
+        raise NoResults
+    loc = geocode_result[0]['geometry']['location']
+    return loc['lat'], loc['lng']
 
-    # Get XML location.
-    xml = urllib.urlopen(url).read()
-
-    if '<error>' in xml:
-        raise Exception('%s\n' % url)
-    else:
-        # Strip lat/long coordinates from XML.
-        center = xml[xml.find('{center')+9:xml.find('}', xml.find('{center'))]
-        center = center.replace('lat:', '').replace('lng:', '')
-        lat, lng = center.split(',')
-        return float(lat), float(lng)
 
 
 @app.route('/geopaging/near/<float:lat>/<float:lon>')
@@ -81,8 +90,13 @@ def results():
 
 @app.route('/geopaging/address', methods=['POST'])
 def address():
-    lat, lon = address_to_lat_lon(request.form.get('address'))
-    return redirect(url_for('near', lat=lat, lon=lon))
+    query = request.form.get('address')
+    try:
+        lat, lon = address_to_lat_lon(query)
+        return redirect(url_for('near', lat=lat, lon=lon))
+    except NoResults:
+        flash('No results for "%s"' % query)
+        return redirect(url_for('near', lat=0, lon=0))
 
 
 @app.route('/geopaging')
@@ -93,5 +107,5 @@ def main():
 
 if __name__ == '__main__':
     print('Go visit http://localhost:5000/geopaging')
-    app.run(host='0.0.0.0')
-
+    app.secret_key = 'asdfasdf123'
+    app.run(host='0.0.0.0', debug=True)
